@@ -9,7 +9,7 @@ include("../src/ztsqrt.jl")
 include("../src/zparfb.jl")
 
 #note n >= m
-function gen_tsqrt_test(::Type{T}, m, n, ib) where {T <: Number}
+function gen_tsqrt_test(::Type{T}, m, n, ib) where {T<:Number}
     A1 = rand(T, n, n)
     lda1 = n
     A2 = rand(T, m, n)
@@ -17,15 +17,15 @@ function gen_tsqrt_test(::Type{T}, m, n, ib) where {T <: Number}
     Tee = rand(T, ib, n)
     ldt = ib
     Tau = rand(T, n)
-    work = rand(T, ib*n)
-    
+    work = rand(T, ib * n)
+
     l = 0
     A = deepcopy(A1)
     B = deepcopy(A2)
     Tee1 = deepcopy(Tee)
 
     lapack_tsqrt!(T, l, A, B, Tee1)
-    ztsqrt(m,n,ib,A1,lda1,A2, lda2, Tee, ldt, Tau, work)
+    ztsqrt(m, n, ib, A1, lda1, A2, lda2, Tee, ldt, Tau, work)
 
     errA1 = norm(A - A1) / norm(A)
     errA2 = norm(B - A2) / norm(B)
@@ -39,7 +39,7 @@ end
 
 # small test for tsqrt
 #gen_tsqrt_test(Float64, 2150, 2351, 256)
-
+"""
 @testset "datatype=T" for T in [Float64, ComplexF64, Float32, ComplexF32]
 
     if T == Float64 || T == ComplexF64
@@ -56,8 +56,9 @@ end
         end
     end
 end
+"""
 
-function gen_tsmqr_test(::Type{T}, side, trans, m1, n1, m2, n2, k, ib) where {T <: Number}
+function gen_tsmqr_test(::Type{T}, side, trans, m1, n1, m2, n2, k, ib) where {T<:Number}
     A1 = rand(T, m1, n1)
     A2 = rand(T, m2, n2)
 
@@ -69,7 +70,7 @@ function gen_tsmqr_test(::Type{T}, side, trans, m1, n1, m2, n2, k, ib) where {T 
 
     else # side = 'R'
         ldv = n2
-        V = rand(T, ldv, n1)        
+        V = rand(T, ldv, n1)
         ldw = m2
         work = rand(T, ldw, ib)
     end
@@ -82,12 +83,12 @@ end
 # for zparfb only called with direct = 'F', storev = 'C', and l = 0
 # issue with storev = R, side = L
 
-function gen_zparfb_test(::Type{T}, side, trans, direct, storev, 
+function gen_zparfb_test(::Type{T}, side, trans, direct, storev,
     m1, n1, m2, n2, k, l) where {T<:Number}
 
     A1 = rand(T, m1, n1)
     A2 = rand(T, m2, n2)
-    
+
     if storev == 'C'
         if side == 'L'
             ldv = m2
@@ -96,7 +97,7 @@ function gen_zparfb_test(::Type{T}, side, trans, direct, storev,
             work = rand(T, ldw, n1)
         else
             ldv = n2
-            V  = rand(T, ldv, k)
+            V = rand(T, ldv, k)
             ldw = m2
             work = rand(T, ldw, k)
         end
@@ -120,8 +121,8 @@ function gen_zparfb_test(::Type{T}, side, trans, direct, storev,
     A1_l = deepcopy(A1)
     A2_l = deepcopy(A2)
 
-    zparfb(side, trans, direct, storev, m1, n1, m2, n2, k, l, 
-    A1, m1, A2, m2, V, ldv, Tee, k, work, ldw)
+    zparfb(side, trans, direct, storev, m1, n1, m2, n2, k, l,
+        A1, m1, A2, m2, V, ldv, Tee, k, work, ldw)
 
     lapack_tprfb!(T, side, trans, direct, storev, l, V, Tee, A1_l, A2_l)
 
@@ -135,11 +136,10 @@ end
 
 # zparfb testing
 side = 'L'
-trans = 'N'
+trans = 'C'
 direct = 'F'
 storev = 'C'
 
-"""
 @testset "datatype=T" for T in [Float64, ComplexF64, Float32, ComplexF32]
     if T == Float64 || T == ComplexF64
         tol = 1e-16
@@ -152,7 +152,7 @@ storev = 'C'
             for n in [214, 557, 1012]
                 maxk = min(n, min(m1,m2))
                 for k in [maxk, div(maxk,5)*4, div(maxk,10)*9]
-                    l = 0
+                    l = k
                     @test gen_zparfb_test(T, side, trans, direct, storev, m1, n, m2, n, k, l) ≈ 0 atol=tol
                     #@test gen_zparfb_test(T, side, trans, direct, storev, n, m1, n, m2, k, l) ≈ 0 atol=tol
                 end
@@ -161,8 +161,6 @@ storev = 'C'
     end
 end
 """
-
-"""
 # small tests for parfb
 m1 = 20
 m2 = 20
@@ -170,7 +168,7 @@ n = 20 # n1 = n2 because left
 k = 10
 l = 5
 
-#gen_zparfb_test(Float64, side, trans, direct, storev, m1, n, m2, n, k, l)
-gen_zparfb_test(Float64, side, trans, direct, storev, n, m1, n, m2, k, l)
+gen_zparfb_test(Float64, side, trans, direct, storev, m1, n, m2, n, k, l)
+#gen_zparfb_test(Float64, side, trans, direct, storev, n, m1, n, m2, k, l)
 """
 
